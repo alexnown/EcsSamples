@@ -27,6 +27,7 @@ namespace alexnown.ChunkIterationPerformance
         public bool LogResults;
         public static bool LogSystemResults;
 
+        private double _totalRandomComponentsSym;
         private World _world;
         private void Start()
         {
@@ -40,6 +41,7 @@ namespace alexnown.ChunkIterationPerformance
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>(), ComponentType.Create<SecondTag>());
             InitEntities(em, ChunksCount - 3 * elementsForType);
             ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.AllWorlds.ToArray());
+            Debug.Log($"Initialize {em.EntityCapacity} entities with random components total sum = {_totalRandomComponentsSym:F3}");
         }
 
         private void InitEntities(EntityManager em, int count, params ComponentType[] components)
@@ -55,9 +57,13 @@ namespace alexnown.ChunkIterationPerformance
                 for (int j = 0; j < EntitiesInChunk - 1; j++)
                 {
                     var copy = em.Instantiate(instance);
-                    em.SetComponentData(copy, new RandomValue { Value = Random.value });
+                    var randValue = Random.value;
+                    _totalRandomComponentsSym += randValue;
+                    em.SetComponentData(copy, new RandomValue { Value = randValue });
                 }
-                em.SetComponentData(instance, new RandomValue { Value = Random.value });
+                var randValueForInstance = Random.value;
+                _totalRandomComponentsSym += randValueForInstance;
+                em.SetComponentData(instance, new RandomValue { Value = randValueForInstance });
             }
         }
 

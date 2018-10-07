@@ -31,39 +31,41 @@ namespace alexnown.ChunkIterationPerformance
             double noTagsSum = 0;
             double firstTagSum = 0;
             double secondTagSum = 0;
+            double totalSum = 0;
             for (int i = 0; i < chunks.Length; i++)
             {
                 var chunk = chunks[i];
                 var firstTag = chunk.Has(_firstType);
                 var secondTag = chunk.Has(_secondType);
                 var array = chunk.GetNativeArray(_randomType);
-
                 if (firstTag)
                 {
-                    firstTagSum += CalcSumValues(array);
+                    firstTagSum += CalcSumValues(array, ref totalSum);
                 }
                 if (secondTag)
                 {
-                    secondTagSum += CalcSumValues(array);
+                    secondTagSum += CalcSumValues(array, ref totalSum);
                 }
                 else if (!firstTag)
                 {
-                    noTagsSum += CalcSumValues(array);
+                    noTagsSum += CalcSumValues(array, ref totalSum);
                 }
             }
             chunks.Dispose();
             if (InitializeChunkIterationWorld.LogSystemResults)
             {
-                UnityEngine.Debug.Log(nameof(SingleQueryChunkIterationSystem) + $" {noTagsSum:F3}/{firstTagSum:F3}/{secondTagSum:F3}");
+                UnityEngine.Debug.Log(nameof(SingleQueryChunkIterationSystem) + $" {noTagsSum:F3}/{firstTagSum:F3}/{secondTagSum:F3} total={totalSum:F3}");
             }
         }
 
-        private double CalcSumValues(NativeArray<RandomValue> array)
+        private double CalcSumValues(NativeArray<RandomValue> array, ref double totalSum)
         {
             double sum = 0;
             for (int i = 0; i < array.Length; i++)
             {
-                sum += array[i].Value;
+                var value = array[i].Value;
+                sum += value;
+                totalSum += value;
             }
             return sum;
         }

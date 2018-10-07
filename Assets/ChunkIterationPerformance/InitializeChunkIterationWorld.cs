@@ -33,6 +33,7 @@ namespace alexnown.ChunkIterationPerformance
             _world = new World("ChunksIteration");
             _world.CreateManager<SingleQueryChunkIterationSystem>();
             _world.CreateManager<GroupsChunkIterationSystem>();
+            _world.CreateManager<GroupsIterationBathingJobSystem>();
             var em = _world.GetOrCreateManager<EntityManager>();
             int elementsForType = ChunksCount / 4;
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>());

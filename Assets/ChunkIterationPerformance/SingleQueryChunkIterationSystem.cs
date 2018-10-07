@@ -1,10 +1,11 @@
-﻿using Unity.Collections;
+﻿using System.Diagnostics;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace alexnown.ChunkIterationPerformance
 {
     [DisableAutoCreation]
-    public class SingleQueryChunkIteration : ComponentSystem
+    public class SingleQueryChunkIterationSystem : ComponentSystem
     {
         private EntityArchetypeQuery _query;
         private ArchetypeChunkComponentType<FirstTag> _firstType;
@@ -52,6 +53,10 @@ namespace alexnown.ChunkIterationPerformance
                 }
             }
             chunks.Dispose();
+            if (InitializeChunkIterationWorld.LogSystemResults)
+            {
+                UnityEngine.Debug.Log(nameof(SingleQueryChunkIterationSystem) + $" {noTagsSum}/{firstTagSum}/{secondTagSum}");
+            }
         }
 
         private float CalcSumValues(NativeArray<RandomValue> array)

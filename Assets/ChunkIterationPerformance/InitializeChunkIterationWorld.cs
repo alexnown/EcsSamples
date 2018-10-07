@@ -24,16 +24,21 @@ namespace alexnown.ChunkIterationPerformance
         [Range(1, 1000000)]
         public int EntitiesInChunk = 1;
 
+        public bool LogResults;
+        public static bool LogSystemResults;
+
         private World _world;
         private void Start()
         {
             _world = new World("ChunksIteration");
-            _world.CreateManager<SingleQueryChunkIteration>();
+            _world.CreateManager<SingleQueryChunkIterationSystem>();
+            _world.CreateManager<GroupsChunkIterationSystem>();
             var em = _world.GetOrCreateManager<EntityManager>();
-            int elementsForType = ChunksCount / 3;
+            int elementsForType = ChunksCount / 4;
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>());
             InitEntities(em, elementsForType, ComponentType.Create<SecondTag>());
-            InitEntities(em, ChunksCount - 2 * elementsForType);
+            InitEntities(em, elementsForType, ComponentType.Create<FirstTag>(), ComponentType.Create<SecondTag>());
+            InitEntities(em, ChunksCount - 3 * elementsForType);
             ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.AllWorlds.ToArray());
         }
 
@@ -54,6 +59,11 @@ namespace alexnown.ChunkIterationPerformance
                 }
                 em.SetComponentData(instance, new RandomValue { Value = Random.value });
             }
+        }
+
+        private void Update()
+        {
+            LogSystemResults = LogResults;
         }
 
         private void OnDestroy()

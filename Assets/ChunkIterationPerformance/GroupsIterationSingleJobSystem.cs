@@ -2,7 +2,6 @@
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
-using UnityEngine;
 
 namespace alexnown.ChunkIterationPerformance
 {
@@ -73,11 +72,7 @@ namespace alexnown.ChunkIterationPerformance
             sumSecodTag.Sums.Dispose();
             sumAll.Sums.Dispose();
 
-            if (InitializeChunkIterationWorld.LogSystemResults)
-            {
-                Debug.Log(nameof(GroupsIterationSingleJobSystem) +
-                    $" {noTagsSum:F3} / {firstTagSum:F3} / {secondTagSum:F3} total = {totalSum:F3}");
-            }
+            InitializeChunkIterationWorld.LogSumResults(this, noTagsSum, firstTagSum, secondTagSum, totalSum);
             return base.OnUpdate(inputDeps);
         }
         

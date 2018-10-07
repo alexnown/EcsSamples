@@ -38,34 +38,31 @@ namespace alexnown.ChunkIterationPerformance
                 var firstTag = chunk.Has(_firstType);
                 var secondTag = chunk.Has(_secondType);
                 var array = chunk.GetNativeArray(_randomType);
+                totalSum += CalcSumValues(array);
                 if (firstTag)
                 {
-                    firstTagSum += CalcSumValues(array, ref totalSum);
+                    firstTagSum += CalcSumValues(array);
                 }
                 if (secondTag)
                 {
-                    secondTagSum += CalcSumValues(array, ref totalSum);
+                    secondTagSum += CalcSumValues(array);
                 }
                 else if (!firstTag)
                 {
-                    noTagsSum += CalcSumValues(array, ref totalSum);
+                    noTagsSum += CalcSumValues(array);
                 }
             }
             chunks.Dispose();
-            if (InitializeChunkIterationWorld.LogSystemResults)
-            {
-                UnityEngine.Debug.Log(nameof(SingleQueryChunkIterationSystem) + $" {noTagsSum:F3}/{firstTagSum:F3}/{secondTagSum:F3} total={totalSum:F3}");
-            }
+            InitializeChunkIterationWorld.LogSumResults(this, noTagsSum, firstTagSum, secondTagSum, totalSum);
         }
 
-        private double CalcSumValues(NativeArray<RandomValue> array, ref double totalSum)
+        private double CalcSumValues(NativeArray<RandomValue> array)
         {
             double sum = 0;
             for (int i = 0; i < array.Length; i++)
             {
                 var value = array[i].Value;
                 sum += value;
-                totalSum += value;
             }
             return sum;
         }

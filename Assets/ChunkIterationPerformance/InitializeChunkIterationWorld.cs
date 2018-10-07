@@ -25,15 +25,16 @@ namespace alexnown.ChunkIterationPerformance
         public int EntitiesInChunk = 1;
 
         public bool LogResults;
-        public static bool LogSystemResults;
 
         private double _totalRandomComponentsSym;
         private World _world;
+        private static InitializeChunkIterationWorld _instance;
         private void Start()
         {
+            _instance = this;
             _world = new World("ChunksIteration");
-            //_world.CreateManager<SingleQueryChunkIterationSystem>();
-            //_world.CreateManager<GroupsChunkIterationSystem>();
+            _world.CreateManager<SingleQueryChunkIterationSystem>();
+            _world.CreateManager<GroupsChunkIterationSystem>();
             _world.CreateManager<GroupsIterationBathingJobSystem>();
             _world.CreateManager<GroupsIterationSingleJobSystem>();
             var em = _world.GetOrCreateManager<EntityManager>();
@@ -43,7 +44,14 @@ namespace alexnown.ChunkIterationPerformance
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>(), ComponentType.Create<SecondTag>());
             InitEntities(em, ChunksCount - 3 * elementsForType);
             ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.AllWorlds.ToArray());
-            Debug.Log($"Initialize {em.EntityCapacity} entities with random components total sum = {_totalRandomComponentsSym:F3}");
+            Debug.Log($"Initialize {ChunksCount * EntitiesInChunk} entities with random components total sum = {_totalRandomComponentsSym:F2}");
+        }
+
+        public static void LogSumResults(ComponentSystemBase system, double noTag, double firstTag, double secondTag, double total)
+        {
+            if (!_instance.LogResults) return;
+            UnityEngine.Debug.Log(system.GetType().Name +
+                $" {noTag:F2} / {firstTag:F2} / {secondTag:F2} total={total:F2}");
         }
 
         private void InitEntities(EntityManager em, int count, params ComponentType[] components)
@@ -67,11 +75,6 @@ namespace alexnown.ChunkIterationPerformance
                 _totalRandomComponentsSym += randValueForInstance;
                 em.SetComponentData(instance, new RandomValue { Value = randValueForInstance });
             }
-        }
-
-        private void Update()
-        {
-            LogSystemResults = LogResults;
         }
 
         private void OnDestroy()

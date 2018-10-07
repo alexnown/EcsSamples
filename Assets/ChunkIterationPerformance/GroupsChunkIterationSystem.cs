@@ -8,6 +8,7 @@ namespace alexnown.ChunkIterationPerformance
         private ComponentGroup _noTagEntities;
         private ComponentGroup _firstTagEntities;
         private ComponentGroup _secondTagEntities;
+        private ComponentGroup _allRandomEntities;
 
         protected override void OnCreateManager()
         {
@@ -17,6 +18,7 @@ namespace alexnown.ChunkIterationPerformance
             _firstTagEntities = GetComponentGroup(ComponentType.Create<RandomValue>(), ComponentType.Create<FirstTag>());
             _secondTagEntities = GetComponentGroup(ComponentType.Create<RandomValue>(),
                 ComponentType.Create<SecondTag>());
+            _allRandomEntities = GetComponentGroup(ComponentType.Create<RandomValue>());
         }
 
         protected override void OnUpdate()
@@ -24,14 +26,14 @@ namespace alexnown.ChunkIterationPerformance
             double noTagsSum = 0;
             double firstTagSum = 0;
             double secondTagSum = 0;
-            double totalRandomComponentsSum = 0;
+            double totalSum = 0;
             if (_noTagEntities.CalculateLength() != 0)
             {
                 var randArray = _noTagEntities.GetComponentDataArray<RandomValue>();
                 for (int i = 0; i < randArray.Length; i++)
                 {
-                    noTagsSum += randArray[i].Value;
-                    totalRandomComponentsSum += randArray[i].Value;
+                    var value = randArray[i].Value;
+                    noTagsSum += value;
                 }
             }
             if (_firstTagEntities.CalculateLength() != 0)
@@ -39,8 +41,8 @@ namespace alexnown.ChunkIterationPerformance
                 var randArray = _firstTagEntities.GetComponentDataArray<RandomValue>();
                 for (int i = 0; i < randArray.Length; i++)
                 {
-                    firstTagSum += randArray[i].Value;
-                    totalRandomComponentsSum += randArray[i].Value;
+                    var value = randArray[i].Value;
+                    firstTagSum += value;
                 }
             }
             if (_secondTagEntities.CalculateLength() != 0)
@@ -48,14 +50,18 @@ namespace alexnown.ChunkIterationPerformance
                 var randArray = _secondTagEntities.GetComponentDataArray<RandomValue>();
                 for (int i = 0; i < randArray.Length; i++)
                 {
-                    secondTagSum += randArray[i].Value;
-                    totalRandomComponentsSum += randArray[i].Value;
+                    var value = randArray[i].Value;
+                    secondTagSum += value;
                 }
             }
-            if (InitializeChunkIterationWorld.LogSystemResults)
+            var allRandArray = _allRandomEntities.GetComponentDataArray<RandomValue>();
+            for (int i = 0; i < allRandArray.Length; i++)
             {
-                UnityEngine.Debug.Log(nameof(GroupsChunkIterationSystem) + $" {noTagsSum:F3}/{firstTagSum:F3}/{secondTagSum:F3} total={totalRandomComponentsSum:F3}");
+                var value = allRandArray[i].Value;
+                totalSum += value;
             }
+
+            InitializeChunkIterationWorld.LogSumResults(this, noTagsSum, firstTagSum, secondTagSum, totalSum);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace alexnown.ChunkIterationPerformance
 {
     public class GroupsIterationBathingJobSystem : JobComponentSystem
     {
-        public const int BatchesCount = 64;
+        public const int BatchesCount = 16;
 
         #region Job
         [BurstCompile]
@@ -51,6 +51,7 @@ namespace alexnown.ChunkIterationPerformance
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            var handlersArray = new NativeList<JobHandle>(4, Allocator.TempJob);
 
             var sumNoTag = CreateJob(_noTagEntities, BatchesCount);
             var noTagHandler = sumNoTag.ScheduleBatch(_noTagEntities.CalculateLength(), sumNoTag.EntitiesInButch);
@@ -60,12 +61,17 @@ namespace alexnown.ChunkIterationPerformance
 
             var sumSecodTag = CreateJob(_secondTagEntities, BatchesCount);
             var secondTagHandler = sumSecodTag.ScheduleBatch(_secondTagEntities.CalculateLength(), sumSecodTag.EntitiesInButch);
-
-            JobHandle.CompleteAll(ref noTagHandler, ref firstTagHandler, ref secondTagHandler);
-
+            
             var sumAll = CreateJob(_allRandomEntities, BatchesCount);
             var handlerAll = sumAll.ScheduleBatch(_allRandomEntities.CalculateLength(), sumAll.EntitiesInButch);
-            handlerAll.Complete();
+
+            handlersArray.Add(handlerAll);
+            handlersArray.Add(noTagHandler);
+            handlersArray.Add(firstTagHandler);
+            handlersArray.Add(secondTagHandler);
+
+            JobHandle.CompleteAll(handlersArray);
+            handlersArray.Dispose();
 
             double noTagsSum = GetSumAndDispose(sumNoTag.Sums);
             double firstTagSum = GetSumAndDispose(sumFirstTag.Sums);

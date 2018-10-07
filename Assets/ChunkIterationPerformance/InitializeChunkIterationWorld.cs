@@ -14,7 +14,7 @@ namespace alexnown.ChunkIterationPerformance
 
     public struct RandomValue : IComponentData
     {
-        public float Value;
+        public double Value;
     }
 
 

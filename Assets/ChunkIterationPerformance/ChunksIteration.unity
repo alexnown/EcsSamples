@@ -155,5 +155,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72c34c888b962f248854ffa86e480ffe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ChunksCount: 3000
-  EntitiesInChunk: 200
+  ChunksCount: 2000
+  EntitiesInChunk: 500
+  LogResults: 0

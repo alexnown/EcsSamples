@@ -21,9 +21,9 @@ namespace alexnown.ChunkIterationPerformance
 
         protected override void OnUpdate()
         {
-            float noTagsSum = 0;
-            float firstTagSum = 0;
-            float secondTagSum = 0;
+            double noTagsSum = 0;
+            double firstTagSum = 0;
+            double secondTagSum = 0;
             if (_noTagEntities.CalculateLength() != 0)
             {
                 var randArray = _noTagEntities.GetComponentDataArray<RandomValue>();
@@ -50,7 +50,7 @@ namespace alexnown.ChunkIterationPerformance
             }
             if (InitializeChunkIterationWorld.LogSystemResults)
             {
-                UnityEngine.Debug.Log(nameof(SingleQueryChunkIterationSystem) + $" {noTagsSum}/{firstTagSum}/{secondTagSum}");
+                UnityEngine.Debug.Log(nameof(SingleQueryChunkIterationSystem) + $" {noTagsSum:F3}/{firstTagSum:F3}/{secondTagSum:F3}");
             }
         }
     }

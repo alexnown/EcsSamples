@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 namespace alexnown.ChunkIterationPerformance
 {
@@ -51,14 +53,19 @@ namespace alexnown.ChunkIterationPerformance
 
             var em = _world.GetOrCreateManager<EntityManager>();
             int elementsForType = ChunksCount / 4;
+            var start = DateTime.Now;
+            var startInitMsg = $"Begin initializing {ChunksCount}x{EntitiesInChunk} entities " + start;
+            Debug.Log(startInitMsg);
+            if (DebugText != null) DebugText.text += startInitMsg + "\n";
+
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>());
             InitEntities(em, elementsForType, ComponentType.Create<SecondTag>());
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>(), ComponentType.Create<SecondTag>());
             InitEntities(em, ChunksCount - 3 * elementsForType);
             ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.AllWorlds.ToArray());
-            var msg = $"Initialize {ChunksCount * EntitiesInChunk} entities with random components total sum = {_totalSym:F2}";
+            var msg = $"Initialize {ChunksCount * EntitiesInChunk} entities with random components total sum = {_totalSym:F2} for {DateTime.Now.Subtract(start).TotalSeconds:F2}s";
             Debug.Log(msg);
-            if (DebugText != null) DebugText.text = msg;
+            if (DebugText != null) DebugText.text += msg;
         }
 
         public static void LogSumResults(ComponentSystemBase system, double noTag, double firstTag, double secondTag, double total)

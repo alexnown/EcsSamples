@@ -7,6 +7,7 @@ using Unity.Jobs;
 
 namespace alexnown.ChunkIterationPerformance
 {
+[DisableAutoCreation]
     [Obsolete("Cant correct summ in different threads ")]
     public class ProcessTagsJobSystem : JobComponentSystem
     {

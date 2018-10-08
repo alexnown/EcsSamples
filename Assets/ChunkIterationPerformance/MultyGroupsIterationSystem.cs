@@ -3,7 +3,7 @@
 namespace alexnown.ChunkIterationPerformance
 {
     [DisableAutoCreation]
-    public class GroupsChunkIterationSystem : ComponentSystem
+    public class MultyGroupsIterationSystem : ComponentSystem
     {
         private ComponentGroup _noTagEntities;
         private ComponentGroup _firstTagEntities;

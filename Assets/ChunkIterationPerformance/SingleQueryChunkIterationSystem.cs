@@ -19,15 +19,15 @@ namespace alexnown.ChunkIterationPerformance
                 All = new[] { ComponentType.Create<RandomValue>() },
                 None = new ComponentType[0]
             };
-            _firstType = GetArchetypeChunkComponentType<FirstTag>(true);
-            _secondType = GetArchetypeChunkComponentType<SecondTag>(true);
+            
         }
 
         protected override void OnUpdate()
         {
-            var chunks = EntityManager.CreateArchetypeChunkArray(_query, Allocator.Persistent);
+            _firstType = GetArchetypeChunkComponentType<FirstTag>(true);
+            _secondType = GetArchetypeChunkComponentType<SecondTag>(true);
             _randomType = GetArchetypeChunkComponentType<RandomValue>(true);
-
+            var chunks = EntityManager.CreateArchetypeChunkArray(_query, Allocator.TempJob);
             double noTagsSum = 0;
             double firstTagSum = 0;
             double secondTagSum = 0;

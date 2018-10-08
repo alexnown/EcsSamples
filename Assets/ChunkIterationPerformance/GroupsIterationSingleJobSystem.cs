@@ -5,6 +5,7 @@ using Unity.Jobs;
 
 namespace alexnown.ChunkIterationPerformance
 {
+    [DisableAutoCreation]
     public class GroupsIterationSingleJobSystem : JobComponentSystem
     {
         #region Job
@@ -16,7 +17,7 @@ namespace alexnown.ChunkIterationPerformance
             public NativeArray<double> Sums;
             [ReadOnly]
             public ComponentDataArray<RandomValue> RandomValues;
-           
+
             public void Execute()
             {
                 double sum = 0;
@@ -33,9 +34,18 @@ namespace alexnown.ChunkIterationPerformance
         private ComponentGroup _firstTagEntities;
         private ComponentGroup _secondTagEntities;
         private ComponentGroup _allRandomEntities;
+        private NativeArray<double>[] _allocatedArrays;
+        private NativeArray<JobHandle> _jobHandler;
 
         protected override void OnCreateManager()
         {
+            _jobHandler = new NativeArray<JobHandle>(4, Allocator.Persistent);
+            _allocatedArrays = new NativeArray<double>[4];
+            _allocatedArrays[0] = new NativeArray<double>(1, Allocator.Persistent);
+            _allocatedArrays[1] = new NativeArray<double>(1, Allocator.Persistent);
+            _allocatedArrays[2] = new NativeArray<double>(1, Allocator.Persistent);
+            _allocatedArrays[3] = new NativeArray<double>(1, Allocator.Persistent);
+
             _noTagEntities = GetComponentGroup(ComponentType.Create<RandomValue>(),
                 ComponentType.Subtractive<FirstTag>(),
                 ComponentType.Subtractive<SecondTag>());
@@ -45,42 +55,44 @@ namespace alexnown.ChunkIterationPerformance
             _allRandomEntities = GetComponentGroup(ComponentType.Create<RandomValue>());
         }
 
+        protected override void OnDestroyManager()
+        {
+            base.OnDestroyManager();
+            if (_jobHandler.IsCreated) _jobHandler.Dispose();
+            foreach (var array in _allocatedArrays)
+            {
+                if (array.IsCreated) array.Dispose();
+            }
+        }
+
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            var handlersArray = new NativeList<JobHandle>(4, Allocator.TempJob);
+            var sumNoTag = CreateJob(_noTagEntities, _allocatedArrays[0]);
+            var sumFirstTag = CreateJob(_firstTagEntities, _allocatedArrays[1]);
+            var sumSecodTag = CreateJob(_secondTagEntities, _allocatedArrays[2]);
+            var sumAll = CreateJob(_allRandomEntities, _allocatedArrays[3]);
 
-            var sumNoTag = CreateJob(_noTagEntities);
-            var sumFirstTag = CreateJob(_firstTagEntities);
-            var sumSecodTag = CreateJob(_secondTagEntities);
-            var sumAll = CreateJob(_allRandomEntities);
+            _jobHandler[0] = sumAll.Schedule();
+            _jobHandler[1] = sumNoTag.Schedule();
+            _jobHandler[2] = sumFirstTag.Schedule();
+            _jobHandler[3] = sumSecodTag.Schedule();
 
-            handlersArray.Add(sumAll.Schedule());
-            handlersArray.Add(sumNoTag.Schedule());
-            handlersArray.Add(sumFirstTag.Schedule());
-            handlersArray.Add(sumSecodTag.Schedule());
-            
-            JobHandle.CompleteAll(handlersArray);
-            handlersArray.Dispose();
+            JobHandle.CompleteAll(_jobHandler);
 
             double noTagsSum = sumNoTag.Sums[0];
             double firstTagSum = sumFirstTag.Sums[0];
             double secondTagSum = sumSecodTag.Sums[0];
             double totalSum = sumAll.Sums[0];
 
-            sumNoTag.Sums.Dispose();
-            sumFirstTag.Sums.Dispose();
-            sumSecodTag.Sums.Dispose();
-            sumAll.Sums.Dispose();
-
             InitializeChunkIterationWorld.LogSumResults(this, noTagsSum, firstTagSum, secondTagSum, totalSum);
             return base.OnUpdate(inputDeps);
         }
-        
-        private SummingElementsJob CreateJob(ComponentGroup group)
+
+        private SummingElementsJob CreateJob(ComponentGroup group, NativeArray<double> array)
         {
             return new SummingElementsJob
             {
-                Sums = new NativeArray<double>(1, Allocator.TempJob),
+                Sums = array,
                 RandomValues = group.GetComponentDataArray<RandomValue>()
             };
         }

@@ -2,6 +2,8 @@
 using System.Linq;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.UI;
+
 namespace alexnown.ChunkIterationPerformance
 {
     public struct SharedComponent : ISharedComponentData
@@ -20,23 +22,33 @@ namespace alexnown.ChunkIterationPerformance
 
     public class InitializeChunkIterationWorld : MonoBehaviour
     {
+        public Text DebugText;
         public int ChunksCount = 10000;
         [Range(1, 1000000)]
         public int EntitiesInChunk = 1;
 
         public bool LogResults;
 
-        private double _totalRandomComponentsSym;
+        private double _totalSym;
         private World _world;
         private static InitializeChunkIterationWorld _instance;
+
         private void Start()
         {
+            World.DisposeAllWorlds();
             _instance = this;
             _world = new World("ChunksIteration");
-            _world.CreateManager<SingleQueryChunkIterationSystem>();
-            _world.CreateManager<GroupsChunkIterationSystem>();
+
+            ////_world.CreateManager<SingleGroupIterationSystem>(); //extremely slow
+            //_world.CreateManager<MultyGroupsIterationSystem>();
+
+            ////approximately equal
+            //_world.CreateManager<SingleQueryChunkIterationSystem>();
+            //_world.CreateManager<MultyQueryChunkIterationsSystem>();
+
             _world.CreateManager<GroupsIterationBathingJobSystem>();
-            _world.CreateManager<GroupsIterationSingleJobSystem>();
+            //_world.CreateManager<GroupsIterationSingleJobSystem>();
+
             var em = _world.GetOrCreateManager<EntityManager>();
             int elementsForType = ChunksCount / 4;
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>());
@@ -44,7 +56,9 @@ namespace alexnown.ChunkIterationPerformance
             InitEntities(em, elementsForType, ComponentType.Create<FirstTag>(), ComponentType.Create<SecondTag>());
             InitEntities(em, ChunksCount - 3 * elementsForType);
             ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.AllWorlds.ToArray());
-            Debug.Log($"Initialize {ChunksCount * EntitiesInChunk} entities with random components total sum = {_totalRandomComponentsSym:F2}");
+            var msg = $"Initialize {ChunksCount * EntitiesInChunk} entities with random components total sum = {_totalSym:F2}";
+            Debug.Log(msg);
+            if (DebugText != null) DebugText.text = msg;
         }
 
         public static void LogSumResults(ComponentSystemBase system, double noTag, double firstTag, double secondTag, double total)
@@ -68,11 +82,11 @@ namespace alexnown.ChunkIterationPerformance
                 {
                     var copy = em.Instantiate(instance);
                     var randValue = Random.value;
-                    _totalRandomComponentsSym += randValue;
+                    _totalSym += randValue;
                     em.SetComponentData(copy, new RandomValue { Value = randValue });
                 }
                 var randValueForInstance = Random.value;
-                _totalRandomComponentsSym += randValueForInstance;
+                _totalSym += randValueForInstance;
                 em.SetComponentData(instance, new RandomValue { Value = randValueForInstance });
             }
         }

@@ -5,8 +5,9 @@ using Unity.Jobs;
 
 namespace alexnown.ChunkIterationPerformance
 {
-    public class ChunkParallelIterationJobSystem : JobComponentSystem
+    public class ChunkIterationBatchingJobSystem : JobComponentSystem
     {
+        private int BatchesCount = 64;
         private EntityArchetypeQuery _query;
         private NativeArray<double> _totalSum;
         private NativeArray<double> _noTagSum;
@@ -15,7 +16,7 @@ namespace alexnown.ChunkIterationPerformance
 
         #region Job
         [BurstCompile]
-        struct ChunkSum : IJobParallelFor
+        struct ChunkSum : IJobParallelForBatch
         {
             [WriteOnly]
             [NativeDisableParallelForRestriction]
@@ -37,21 +38,38 @@ namespace alexnown.ChunkIterationPerformance
             public ArchetypeChunkComponentType<FirstTag> FirstTagType;
             [ReadOnly]
             public ArchetypeChunkComponentType<SecondTag> SecondTagType;
-            public void Execute(int index)
+
+            [ReadOnly]
+            public int ChunksInBatch;
+
+            public void Execute(int startIndex, int count)
             {
-                double sum = 0;
-                var chunk = Chunks[index];
-                var array = chunk.GetNativeArray(RandomType);
-                for (int i = 0; i < array.Length; i++)
+                double noTagsSum = 0;
+                double firstTagSum = 0;
+                double secondTagSum = 0;
+                double totalSum = 0;
+                for (int i = startIndex; i < startIndex + count; i++)
                 {
-                    sum += array[i].Value;
+                    var chunk = Chunks[i];
+                    if (chunk.Count == 0) continue;
+                    bool hasFirst = chunk.Has(FirstTagType);
+                    bool hasSecond = chunk.Has(SecondTagType);
+                    var array = chunk.GetNativeArray(RandomType);
+                    double totalArraySum = 0;
+                    for (int j = 0; j < array.Length; j++)
+                    {
+                        totalArraySum += array[j].Value;
+                    }
+                    totalSum += totalArraySum;
+                    if (hasFirst) firstTagSum += totalArraySum;
+                    if (hasSecond) secondTagSum += totalArraySum;
+                    else if (!hasFirst) noTagsSum += totalArraySum;
                 }
-                TotalResults[index] = sum;
-                bool hasFirst = chunk.Has(FirstTagType);
-                bool hasSecond = chunk.Has(SecondTagType);
-                if (hasFirst) FirstTagResults[index] = sum;
-                if (hasSecond) SecondTagResults[index] = sum;
-                else if (!hasFirst) NoTagResults[index] = sum;
+                int resultIndex = startIndex / ChunksInBatch;
+                TotalResults[resultIndex] = totalSum;
+                FirstTagResults[resultIndex] = firstTagSum;
+                SecondTagResults[resultIndex] = secondTagSum;
+                NoTagResults[resultIndex] = noTagsSum;
             }
         }
         #endregion
@@ -65,31 +83,26 @@ namespace alexnown.ChunkIterationPerformance
                 All = new[] { ComponentType.Create<RandomValue>() },
                 None = new ComponentType[0]
             };
+            _totalSum = new NativeArray<double>(BatchesCount, Allocator.Persistent);
+            _noTagSum = new NativeArray<double>(BatchesCount, Allocator.Persistent);
+            _firstTagSum = new NativeArray<double>(BatchesCount, Allocator.Persistent);
+            _secondTimeSum = new NativeArray<double>(BatchesCount, Allocator.Persistent);
         }
 
         protected override void OnDestroyManager()
         {
             base.OnDestroyManager();
-            if (_totalSum.IsCreated)
-            {
-                _totalSum.Dispose();
-                _noTagSum.Dispose();
-                _firstTagSum.Dispose();
-                _secondTimeSum.Dispose();
-            }
+            _totalSum.Dispose();
+            _noTagSum.Dispose();
+            _firstTagSum.Dispose();
+            _secondTimeSum.Dispose();
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var chunks = EntityManager.CreateArchetypeChunkArray(_query, Allocator.TempJob);
             InitializeChunkIterationWorld.LogChunksCount(this, chunks.Length);
-            if (!_totalSum.IsCreated)
-            {
-                _totalSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
-                _noTagSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
-                _firstTagSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
-                _secondTimeSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
-            }
+            int inBatch = chunks.Length / BatchesCount + 1;
             var job = new ChunkSum
             {
                 Chunks = chunks,
@@ -99,8 +112,9 @@ namespace alexnown.ChunkIterationPerformance
                 TotalResults = _totalSum,
                 NoTagResults = _noTagSum,
                 FirstTagResults = _firstTagSum,
-                SecondTagResults = _secondTimeSum
-            }.Schedule(chunks.Length, 64);
+                SecondTagResults = _secondTimeSum,
+                ChunksInBatch = inBatch
+            }.ScheduleBatch(chunks.Length, inBatch);
             job.Complete();
             double noTagsSum = 0;
             double firstTagSum = 0;
@@ -113,7 +127,6 @@ namespace alexnown.ChunkIterationPerformance
                 firstTagSum += _firstTagSum[i];
                 secondTagSum += _secondTimeSum[i];
             }
-
 
             InitializeChunkIterationWorld.LogSumResults(this, noTagsSum, firstTagSum, secondTagSum, totalSum);
 

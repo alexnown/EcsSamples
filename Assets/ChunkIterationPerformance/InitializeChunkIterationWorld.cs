@@ -18,7 +18,7 @@ namespace alexnown.ChunkIterationPerformance
 
     public struct RandomValue : IComponentData
     {
-        public double Value;
+        public float Value;
     }
 
 
@@ -50,6 +50,7 @@ namespace alexnown.ChunkIterationPerformance
 
             //_world.CreateManager<GroupsIterationBathingJobSystem>();
             _world.CreateManager<ChunkParallelIterationJobSystem>();
+            _world.CreateManager<ChunkIterationBatchingJobSystem>();
             //_world.CreateManager<GroupsIterationSingleJobSystem>();
 
             var em = _world.GetOrCreateManager<EntityManager>();
@@ -74,6 +75,12 @@ namespace alexnown.ChunkIterationPerformance
             if (!_instance.LogResults) return;
             UnityEngine.Debug.Log(system.GetType().Name +
                 $" {noTag:F2} / {firstTag:F2} / {secondTag:F2} total={total:F2}");
+        }
+
+        public static void LogChunksCount(ComponentSystemBase system, int chunks)
+        {
+            if (!_instance.LogResults) return;
+            UnityEngine.Debug.Log(system.GetType().Name +" chunks = "+chunks);
         }
 
         private void InitEntities(EntityManager em, int count, params ComponentType[] components)

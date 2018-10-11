@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Sprites4
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 4
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 1
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+    totalSpriteSurfaceArea: 1635674
+    bindAsDefault: 1
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300010, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300008, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300014, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300012, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300002, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300000, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300006, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300004, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300018, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300016, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300064, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300066, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300060, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300062, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300050, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300072, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300048, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300074, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300054, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300068, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300052, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300070, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300042, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300040, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300046, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300076, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300044, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300078, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300058, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300056, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300036, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300038, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300028, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300030, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300032, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300034, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300020, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300022, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300024, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  - {fileID: 21300026, guid: e99b418e81441fe4c9afb881796ce291, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - Sprite4_5
+  - Sprite4_4
+  - Sprite4_7
+  - Sprite4_6
+  - Sprite4_1
+  - Sprite4_0
+  - Sprite4_3
+  - Sprite4_2
+  - Sprite4_9
+  - Sprite4_8
+  - Sprite4_32
+  - Sprite4_33
+  - Sprite4_30
+  - Sprite4_31
+  - Sprite4_25
+  - Sprite4_36
+  - Sprite4_24
+  - Sprite4_37
+  - Sprite4_27
+  - Sprite4_34
+  - Sprite4_26
+  - Sprite4_35
+  - Sprite4_21
+  - Sprite4_20
+  - Sprite4_23
+  - Sprite4_38
+  - Sprite4_22
+  - Sprite4_39
+  - Sprite4_29
+  - Sprite4_28
+  - Sprite4_18
+  - Sprite4_19
+  - Sprite4_14
+  - Sprite4_15
+  - Sprite4_16
+  - Sprite4_17
+  - Sprite4_10
+  - Sprite4_11
+  - Sprite4_12
+  - Sprite4_13
+  m_Tag: Sprites4
+  m_IsVariant: 0

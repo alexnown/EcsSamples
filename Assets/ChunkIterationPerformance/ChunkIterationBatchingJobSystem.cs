@@ -5,6 +5,7 @@ using Unity.Jobs;
 
 namespace alexnown.ChunkIterationPerformance
 {
+    [DisableAutoCreation]
     public class ChunkIterationBatchingJobSystem : JobComponentSystem
     {
         private int BatchesCount = 64;

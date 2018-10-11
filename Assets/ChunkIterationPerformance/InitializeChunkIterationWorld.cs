@@ -105,14 +105,5 @@ namespace alexnown.ChunkIterationPerformance
                 em.SetComponentData(instance, new RandomValue { Value = randValueForInstance });
             }
         }
-
-        private void OnDestroy()
-        {
-            if (!_world.IsCreated)
-            {
-                _world.Dispose();
-                ScriptBehaviourUpdateOrder.UpdatePlayerLoop(World.AllWorlds.ToArray());
-            }
-        }
     }
 }

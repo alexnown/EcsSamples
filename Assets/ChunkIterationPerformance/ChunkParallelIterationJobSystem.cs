@@ -5,6 +5,7 @@ using Unity.Jobs;
 
 namespace alexnown.ChunkIterationPerformance
 {
+    [DisableAutoCreation]
     public class ChunkParallelIterationJobSystem : JobComponentSystem
     {
         private EntityArchetypeQuery _query;

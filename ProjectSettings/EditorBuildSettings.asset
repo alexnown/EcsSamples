@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/DrawOrderPerformance/DrawOrder.unity
+    guid: 8e3717f3fb7e02842b19b875bddc63e0
+  - enabled: 0
     path: Assets/ChunkIterationPerformance/ChunksIteration.unity
     guid: 5bb55feca58b5bb4d91f8817fba865a6
   m_configObjects: {}

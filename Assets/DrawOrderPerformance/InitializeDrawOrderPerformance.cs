@@ -1,10 +1,8 @@
 ﻿using System.Linq;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.U2D;
 using Random = UnityEngine.Random;
 
@@ -21,8 +19,8 @@ namespace alexnown.DrawOrderPerformance
 
         private void Start()
         {
-            //World.DisposeAllWorlds();
-            var world = World.Active;//new World("DrawOrderPerformance");
+            World.DisposeAllWorlds();
+            var world = new World("DrawOrderPerformance");
             world.CreateManager<SharedSpriteRendererSystem>();
 
             var sprites = new Sprite[Atlas.spriteCount];
@@ -37,26 +35,26 @@ namespace alexnown.DrawOrderPerformance
             if (sprites == null || sprites.Length == 0 || Multiplier < 1) return;
             var em = world.GetOrCreateManager<EntityManager>();
             var archetype = em.CreateArchetype(ComponentType.Create<Position>(),
-                ComponentType.Create<SharedSprite>(), ComponentType.Create<MeshInstanceRenderer>());
+                ComponentType.Create<SharedSprite>());//, ComponentType.Create<MeshInstanceRenderer>());
             foreach (var sprite in sprites)
             {
                 var material = Instantiate(DrawMaterial);
                 material.enableInstancing = true;
                 material.mainTexture = sprite.texture;
                 var mesh = SharedSpriteRendererSystem.CreateMeshForSprite(sprite);
-                var meshData = new MeshInstanceRenderer
+                /*var meshData = new MeshInstanceRenderer
                 {
                     mesh = mesh,
                     material = material,
                     castShadows = ShadowCastingMode.Off
-                };
+                }; */
                 var charedData = new SharedSprite
                 {
                     mat = material,
                     mesh = mesh
                 };
                 var firstEntity = em.CreateEntity(archetype);
-                em.SetSharedComponentData(firstEntity, meshData);
+                //em.SetSharedComponentData(firstEntity, meshData);
                 em.SetSharedComponentData(firstEntity, charedData);
                 if (Multiplier > 1)
                 {

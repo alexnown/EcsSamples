@@ -6,22 +6,19 @@ using Unity.Jobs;
 namespace alexnown.ChunkIterationPerformance
 {
     [DisableAutoCreation]
-    public class ChunkParallelIterationJobSystem : JobComponentSystem
+    public class ChunkIterationJobSystem : JobComponentSystem
     {
-        private EntityArchetypeQuery _query;
         private NativeArray<double> _totalSum;
         private NativeArray<double> _noTagSum;
         private NativeArray<double> _firstTagSum;
         private NativeArray<double> _secondTagSum;
 
-        #region Job
         [BurstCompile]
-        struct ChunkSum : IJobParallelFor
+        struct SumChunkJob : IJobChunk
         {
             [WriteOnly]
             [NativeDisableParallelForRestriction]
             public NativeArray<double> TotalResults;
-            [WriteOnly]
             [NativeDisableParallelForRestriction]
             public NativeArray<double> NoTagResults;
             [WriteOnly]
@@ -31,17 +28,15 @@ namespace alexnown.ChunkIterationPerformance
             [NativeDisableParallelForRestriction]
             public NativeArray<double> SecondTagResults;
             [ReadOnly]
-            public NativeArray<ArchetypeChunk> Chunks;
-            [ReadOnly]
             public ArchetypeChunkComponentType<RandomValue> RandomType;
             [ReadOnly]
             public ArchetypeChunkComponentType<FirstTag> FirstTagType;
             [ReadOnly]
             public ArchetypeChunkComponentType<SecondTag> SecondTagType;
-            public void Execute(int index)
+
+            public void Execute(ArchetypeChunk chunk, int index)
             {
                 double sum = 0;
-                var chunk = Chunks[index];
                 var array = chunk.GetNativeArray(RandomType);
                 for (int i = 0; i < array.Length; i++)
                 {
@@ -55,17 +50,17 @@ namespace alexnown.ChunkIterationPerformance
                 else if (!hasFirst) NoTagResults[index] = sum;
             }
         }
-        #endregion
 
+
+        private ComponentGroup _randomGroup;
         protected override void OnCreateManager()
         {
-            base.OnCreateManager();
-            _query = new EntityArchetypeQuery
+            _randomGroup = GetComponentGroup(new EntityArchetypeQuery
             {
                 Any = new ComponentType[0],
                 All = new[] { ComponentType.Create<RandomValue>() },
                 None = new ComponentType[0]
-            };
+            });
         }
 
         protected override void OnDestroyManager()
@@ -79,29 +74,36 @@ namespace alexnown.ChunkIterationPerformance
                 _secondTagSum.Dispose();
             }
         }
-
+        
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            var chunks = EntityManager.CreateArchetypeChunkArray(_query, Allocator.TempJob);
-            InitializeChunkIterationWorld.LogChunksCount(this, chunks.Length);
             if (!_totalSum.IsCreated)
             {
-                _totalSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
-                _noTagSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
-                _firstTagSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
-                _secondTagSum = new NativeArray<double>(chunks.Length, Allocator.Persistent);
+
+                var chunks = EntityManager.CreateArchetypeChunkArray(new EntityArchetypeQuery
+                {
+                    Any = new ComponentType[0],
+                    All = new[] { ComponentType.Create<RandomValue>() },
+                    None = new ComponentType[0]
+                }, Allocator.Persistent);
+                int chunksCount = chunks.Length;
+                chunks.Dispose();
+                _totalSum = new NativeArray<double>(chunksCount, Allocator.Persistent);
+                _noTagSum = new NativeArray<double>(chunksCount, Allocator.Persistent);
+                _firstTagSum = new NativeArray<double>(chunksCount, Allocator.Persistent);
+                _secondTagSum = new NativeArray<double>(chunksCount, Allocator.Persistent);
             }
-            var job = new ChunkSum
+
+            var job = new SumChunkJob
             {
-                Chunks = chunks,
+                TotalResults = _totalSum,
+                FirstTagResults = _firstTagSum,
+                SecondTagResults = _secondTagSum,
+                NoTagResults = _noTagSum,
                 RandomType = GetArchetypeChunkComponentType<RandomValue>(true),
                 FirstTagType = GetArchetypeChunkComponentType<FirstTag>(true),
-                SecondTagType = GetArchetypeChunkComponentType<SecondTag>(true),
-                TotalResults = _totalSum,
-                NoTagResults = _noTagSum,
-                FirstTagResults = _firstTagSum,
-                SecondTagResults = _secondTagSum
-            }.Schedule(chunks.Length, 64);
+                SecondTagType = GetArchetypeChunkComponentType<SecondTag>(true)
+            }.Schedule(_randomGroup, inputDeps);
             job.Complete();
             double noTagsSum = 0;
             double firstTagSum = 0;
@@ -114,12 +116,8 @@ namespace alexnown.ChunkIterationPerformance
                 firstTagSum += _firstTagSum[i];
                 secondTagSum += _secondTagSum[i];
             }
-
-
             InitializeChunkIterationWorld.LogSumResults(this, noTagsSum, firstTagSum, secondTagSum, totalSum);
-
-            chunks.Dispose();
-            return base.OnUpdate(inputDeps);
+            return inputDeps;
         }
     }
 }

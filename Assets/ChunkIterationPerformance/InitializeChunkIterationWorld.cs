@@ -51,6 +51,7 @@ namespace alexnown.ChunkIterationPerformance
             //_world.CreateManager<GroupsIterationBathingJobSystem>();
             _world.CreateManager<ChunkParallelIterationJobSystem>();
             _world.CreateManager<ChunkIterationBatchingJobSystem>();
+            _world.CreateManager<ChunkIterationJobSystem>();
             //_world.CreateManager<GroupsIterationSingleJobSystem>();
 
             var em = _world.GetOrCreateManager<EntityManager>();

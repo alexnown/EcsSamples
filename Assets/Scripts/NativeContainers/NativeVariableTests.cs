@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Unity.Collections;
 using UnityEngine;
 using Assert = NUnit.Framework.Assert;
+using Unity.Jobs;
 
 namespace alexnown.Tests
 {
@@ -72,6 +73,21 @@ namespace alexnown.Tests
             Assert.Throws<InvalidOperationException>(() => { int myValue = variable.Value; });
         }
 
+        [Test]
+        public void ChangeValueInJob()
+        {
+            var nativeVariable = new NativeVariable<int>(Allocator.TempJob);
+            int iterationsCount = 10000;
+            var job = new WriteToNativeVariableValue
+            {
+                Iterations = iterationsCount,
+                Variable = nativeVariable
+            }.Schedule();
+            job.Complete();
+            Assert.AreEqual(iterationsCount, nativeVariable.Value);
+            nativeVariable.Dispose();
+        }
+
         struct BlittableStruct
         {
             public long Id;
@@ -81,6 +97,24 @@ namespace alexnown.Tests
         struct NotBlittableStruct
         {
             public GameObject Go;
+        }
+
+        struct WriteToNativeVariableValue : IJob
+        {
+            public NativeVariable<int> Variable;
+            public int Iterations;
+
+            private int _nextValue;
+
+            public void Execute()
+            {
+                while (Iterations > 0)
+                {
+                    Iterations--;
+                    _nextValue++;
+                    Variable.Value = _nextValue;
+                }
+            }
         }
     }
 }

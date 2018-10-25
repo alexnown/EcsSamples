@@ -1,7 +1,8 @@
 {
     "name": "NativeComtaomersTests",
     "references": [
-        "Unity.Entities.Tests"
+        "Unity.Entities.Tests",
+        "Unity.Jobs",
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

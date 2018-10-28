@@ -14,6 +14,10 @@ namespace alexnown.NativeContainers
         public Allocator Allocator { get; private set; }
         public bool Disposed { get; private set; }
 
+        internal AtomicSafetyHandle _Safety;
+        [NativeSetClassTypeToNullOnSchedule]
+        internal DisposeSentinel _DisposeSentinel;
+
         public T Value
         {
             get
@@ -45,6 +49,7 @@ namespace alexnown.NativeContainers
             int size = UnsafeUtility.SizeOf<T>();
             _addr = UnsafeUtility.Malloc(size, UnsafeUtility.AlignOf<T>(), allocator);
             UnsafeUtility.MemClear(_addr, size);
+            DisposeSentinel.Create(out _Safety, out _DisposeSentinel, 1, allocator);
         }
 
         [WriteAccessRequired]
@@ -65,6 +70,25 @@ namespace alexnown.NativeContainers
         {
             if(Disposed) throw new InvalidOperationException("NativeVariable already disposed.");
         }
-        
+        /*
+        [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+        void CheckElementReadAccess(int index)
+        {
+            var versionPtr = (AtomicSafetyHandleVersionMask*)_Safety.versionNode;
+            if ((_Safety.version & AtomicSafetyHandleVersionMask.Read) == 0 && _Safety.version != ((*versionPtr) & AtomicSafetyHandleVersionMask.WriteInv))
+                AtomicSafetyHandle.CheckReadAndThrowNoEarlyOut(_Safety);
+        }
+
+        [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+        void CheckElementWriteAccess(int index)
+        {
+            if (index < m_MinIndex || index > m_MaxIndex)
+                FailOutOfRangeError(index);
+
+            var versionPtr = (AtomicSafetyHandleVersionMask*)m_Safety.versionNode;
+            if ((m_Safety.version & AtomicSafetyHandleVersionMask.Write) == 0 && m_Safety.version != ((*versionPtr) & AtomicSafetyHandleVersionMask.ReadInv))
+                AtomicSafetyHandle.CheckWriteAndThrowNoEarlyOut(m_Safety);
+        } */
+
     }
 }

@@ -344,7 +344,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DrawMaterial: {fileID: 2100000, guid: eef86e9a2e98d2a4c991ced71560baf6, type: 2}
   Atlas: {fileID: 4343727234628468602, guid: 5df61fcf6302755419620f1cb75076f6, type: 2}
-  Multiplier: 300
+  Multiplier: 20
   MovePath: 10
 --- !u!4 &1570806895
 Transform:
